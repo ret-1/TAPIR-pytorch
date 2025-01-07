@@ -1,0 +1,8 @@
+torch
+torchvision
+Pillow
+einshape
+pandas
+tqdm
+PyYAML
+numpy
