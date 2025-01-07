@@ -37,7 +37,7 @@ world_size = distributed.get_world_size()
 torch.cuda.set_device(local_rank)
 print(f'I am rank {local_rank} in this world of size {world_size}!')
 
-if local_rank == 0:
+if local_rank == 0 and config['LOGGER']['ENABLE']:
     print('I will take the role of logging!')
     import wandb
     run = wandb.init(entity=config['LOGGER']['ENTITY'], project=config['LOGGER']['PROJECT'], config=config)
@@ -74,7 +74,8 @@ for epoch in range(1, config['TRAIN']['EPOCHS']+1):
         for k, v in metrics_b.items():
             metrics[k] += v
 
-    run.log({f'train/{k}': v/len_train_loader for k, v in metrics.items()})
+    if run is not None:
+        run.log({f'train/{k}': v/len_train_loader for k, v in metrics.items()})
 
     if config['TRAIN']['VALIDATION']['ENABLE'] and epoch % config['TRAIN']['VALIDATION']['INTERVAL'] == 0:
         trainer.model.eval()
@@ -87,7 +88,8 @@ for epoch in range(1, config['TRAIN']['EPOCHS']+1):
                 for k, v in metrics_b.items():
                     metrics[k] += v
 
-        run.log({f'val/{k}': v/len_val_loader for k, v in metrics.items()})
+        if run is not None:
+            run.log({f'val/{k}': v/len_val_loader for k, v in metrics.items()})
 
         trainer.save(os.path.join(config['CHECKPOINT']['SAVE_DIR'], 'lasts'), epoch)
         if metrics['loss'] < best_loss:
