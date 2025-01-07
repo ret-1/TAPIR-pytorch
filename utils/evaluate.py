@@ -9,6 +9,26 @@ Evaluation metrices for point-tracking.
 import numpy as np
 from typing import Mapping
 
+def getMetricsDict():
+    metrics = {
+        "occlusion_accuracy": 0.0,
+        "pts_within_1": 0.0,
+        "pts_within_2": 0.0,
+        "pts_within_4": 0.0,
+        "pts_within_8": 0.0,
+        "pts_within_16": 0.0,
+        "average_pts_within_thresh": 0.0,
+        "jaccard_1": 0.0,
+        "jaccard_2": 0.0,
+        "jaccard_4": 0.0,
+        "jaccard_8": 0.0,
+        "jaccard_16": 0.0,
+        "average_jaccard": 0.0,
+        "inference_time": 0.0,
+        "survival": 0.0,
+        "median_traj_error": 0.0,
+    }
+    return metrics
 
 def compute_metrics(query_points, trajs_g, visibs_g, trajs_e, visibs_e):
     """Compute point tracking evaluation metrics for a given batch of samples
@@ -58,8 +78,9 @@ def compute_metrics(query_points, trajs_g, visibs_g, trajs_e, visibs_e):
 
     # taking the mean across videos
     metrics = {}
-    for key, value in outputs.items():
-        metrics[key] = float(value.mean())
+    for k, v in outputs.items():
+        temp = float(v.mean())
+        metrics[k] = 0 if np.isnan(temp) else temp
 
     return metrics
 
@@ -201,7 +222,7 @@ def compute_tapvid_metrics(
         false_positives = (~visible) & pred_visible
         false_positives = false_positives | ((~within_dist) & pred_visible)
         false_positives = np.sum(false_positives & evaluation_points, axis=(1, 2))
-        jaccard = true_positives / (gt_positives + false_positives + 1e-6)
+        jaccard = true_positives / (gt_positives + false_positives + 1e-6) # to avoid division by zero
         metrics["jaccard_" + str(thresh)] = jaccard
         all_jaccard.append(jaccard)
     metrics["average_jaccard"] = np.mean(
