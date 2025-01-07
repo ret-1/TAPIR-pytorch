@@ -10,7 +10,7 @@ class Trainer:
         self.model = Tapir(
             pyramid_level=config['MODEL']['PYRAMID_LEVEL'],
             extra_convs=config['MODEL']['EXTRA_CONVS'],
-        )
+        ).cuda()
         self.optimizer, self.scheduler = fetch_optimizer(
             lr=config['TRAIN']['LR'],
             wdecay=config['TRAIN']['WEIGHT_DECAY'],
@@ -83,7 +83,7 @@ class Trainer:
                 query_points=points_0_xy.cpu().numpy(),
                 trajs_g=traj_g.cpu().numpy(),
                 visibs_g=visib_g.cpu().numpy(),
-                trajs_e=traj_e.cpu().numpy(),
+                trajs_e=traj_e.detach().cpu().numpy(),
                 visibs_e=visib_e.cpu().numpy(),
             )
 

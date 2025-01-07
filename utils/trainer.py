@@ -1,8 +1,27 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from utils import basic
 
+EPS = 1e-6
+
+def reduce_masked_mean(x, mask, dim=None, keepdim=False):
+    # x and mask are the same shape, or at least broadcastably so < actually it's safer if you disallow broadcasting
+    # returns shape-1
+    # axis can be a list of axes
+    for (a,b) in zip(x.size(), mask.size()):
+        # if not b==1: 
+        assert(a==b) # some shape mismatch!
+    # assert(x.size() == mask.size())
+    prod = x*mask
+    if dim is None:
+        numer = torch.sum(prod)
+        denom = EPS+torch.sum(mask)
+    else:
+        numer = torch.sum(prod, dim=dim, keepdim=keepdim)
+        denom = EPS+torch.sum(mask, dim=dim, keepdim=keepdim)
+        
+    mean = numer/denom
+    return mean
 
 def sequence_loss(flow_preds, flow_gt, vis, valids, gamma=0.8):
     """Loss function defined over sequence of flow predictions"""
@@ -20,7 +39,7 @@ def sequence_loss(flow_preds, flow_gt, vis, valids, gamma=0.8):
         i_loss = (flow_pred - flow_gt).abs()  # B,S,N,2
         i_loss = torch.mean(i_loss, dim=3)  # B,S,N
         # flow_loss += i_weight * basic.reduce_masked_mean(i_loss, valids)
-        flow_loss += i_weight * basic.reduce_masked_mean(
+        flow_loss += i_weight * reduce_masked_mean(
             i_loss, valids, dim=(1, 2), keepdim=True
         ).squeeze(1)
     flow_loss = flow_loss / n_predictions

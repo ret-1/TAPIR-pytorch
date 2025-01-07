@@ -54,22 +54,23 @@ def construct_loader(dataset_root, batch_size, num_workers):
     return loader
 
 train_loader = construct_loader(config['TRAIN']['DATASET_ROOT'], config['TRAIN']['BATCH_SIZE'], config['TRAIN']['NUM_WORKERS'])
+len_train_loader = len(train_loader)
 
-if config['TRAIN']['VALIDATION']['ENABLE']:
+if config['VALIDATION']['ENABLE']:
     print('Validation is enabled!')
     val_loader = construct_loader(config['VALIDATION']['DATASET_ROOT'], config['TRAIN']['BATCH_SIZE'], config['TRAIN']['NUM_WORKERS'])
+    len_val_loader = len(val_loader)
 
-len_train_loader = len(train_loader)
-len_val_loader = len(val_loader) if config['TRAIN']['VALIDATION']['ENABLE'] else 0
 trainer = Trainer(config, len_train_loader)
+best_loss = 100000.0
 
 for epoch in range(1, config['TRAIN']['EPOCHS']+1):
-    best_loss = 100000.0
+    # train
     trainer.model.train()
+    metrics = getMetricsDict()
+    metrics['loss'] = 0.0
+    
     for data in train_loader:
-        metrics = getMetricsDict()
-        metrics['loss'] = 0.0
-        
         metrics_b = trainer.do_pass(*data, is_train=True)
         for k, v in metrics_b.items():
             metrics[k] += v
@@ -77,7 +78,8 @@ for epoch in range(1, config['TRAIN']['EPOCHS']+1):
     if run is not None:
         run.log({f'train/{k}': v/len_train_loader for k, v in metrics.items()})
 
-    if config['TRAIN']['VALIDATION']['ENABLE'] and epoch % config['TRAIN']['VALIDATION']['INTERVAL'] == 0:
+    # validation
+    if config['VALIDATION']['ENABLE'] and epoch % config['VALIDATION']['INTERVAL'] == 0:
         trainer.model.eval()
         metrics = getMetricsDict()
         metrics['loss'] = 0.0

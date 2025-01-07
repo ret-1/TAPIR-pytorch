@@ -78,8 +78,9 @@ def compute_metrics(query_points, trajs_g, visibs_g, trajs_e, visibs_e):
 
     # taking the mean across videos
     metrics = {}
-    for key, value in outputs.items():
-        metrics[key] = float(value.mean())
+    for k, v in outputs.items():
+        temp = float(v.mean())
+        metrics[k] = 0 if np.isnan(temp) else temp
 
     return metrics
 
@@ -221,7 +222,7 @@ def compute_tapvid_metrics(
         false_positives = (~visible) & pred_visible
         false_positives = false_positives | ((~within_dist) & pred_visible)
         false_positives = np.sum(false_positives & evaluation_points, axis=(1, 2))
-        jaccard = true_positives / (gt_positives + false_positives + 1e-6)
+        jaccard = true_positives / (gt_positives + false_positives + 1e-6) # to avoid division by zero
         metrics["jaccard_" + str(thresh)] = jaccard
         all_jaccard.append(jaccard)
     metrics["average_jaccard"] = np.mean(
