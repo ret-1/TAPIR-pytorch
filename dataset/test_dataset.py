@@ -1,7 +1,6 @@
 from torch.utils.data import Dataset
 import os
 import pickle
-from tqdm import tqdm
 import numpy as np
 from PIL import Image
 import io
