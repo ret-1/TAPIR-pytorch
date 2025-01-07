@@ -9,6 +9,26 @@ Evaluation metrices for point-tracking.
 import numpy as np
 from typing import Mapping
 
+def getMetricsDict():
+    metrics = {
+        "occlusion_accuracy": 0.0,
+        "pts_within_1": 0.0,
+        "pts_within_2": 0.0,
+        "pts_within_4": 0.0,
+        "pts_within_8": 0.0,
+        "pts_within_16": 0.0,
+        "average_pts_within_thresh": 0.0,
+        "jaccard_1": 0.0,
+        "jaccard_2": 0.0,
+        "jaccard_4": 0.0,
+        "jaccard_8": 0.0,
+        "jaccard_16": 0.0,
+        "average_jaccard": 0.0,
+        "inference_time": 0.0,
+        "survival": 0.0,
+        "median_traj_error": 0.0,
+    }
+    return metrics
 
 def compute_metrics(query_points, trajs_g, visibs_g, trajs_e, visibs_e):
     """Compute point tracking evaluation metrics for a given batch of samples

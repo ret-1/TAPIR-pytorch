@@ -1,0 +1,26 @@
+MODEL:
+  PYRAMID_LEVEL: 0
+  EXTRA_CONVS: False
+
+TRAIN:
+  DATASET_ROOT:
+  BATCH_SIZE: 2
+  NUM_WORKERS: 4
+  EPOCHS: 50
+  LR: 5.0e-4
+  WEIGHT_DECAY: 1.0e-6
+  EPSILON: 1.0e-8
+
+VALIDATION:
+  ENABLE: True
+  INTERVAL: 
+  DATASET_ROOT:
+
+LOGGER:
+  PROJECT:
+  ENTITY:
+
+CHECKPOINT:
+  SAVE_DIR: 
+  LOAD_NETWORK:     # Path to pretrained network weight only
+  LOAD_CHECKPOINT:  # Path to the checkpoint file, including network, optimizer and such
